@@ -10,6 +10,9 @@ function Overview() {
   const [message, setMessage] = useState('')
   const [saving, setSaving] = useState(false)
   const [editingId, setEditingId] = useState(null)
+  const [showAllProjects, setShowAllProjects] = useState(false)
+  const [showAllAchievements, setShowAllAchievements] = useState(false)
+  const [showAllCertifications, setShowAllCertifications] = useState(false)
 
   const [form, setForm] = useState({
     title: '',
@@ -437,6 +440,36 @@ function Overview() {
     setError('')
   }
 
+  // Sort newest records first, using ID as a fallback.
+  const sortNewestFirst = (items) =>
+    [...items].sort((a, b) => {
+      const dateA = a.created_at
+        ? new Date(a.created_at).getTime()
+        : 0
+      const dateB = b.created_at
+        ? new Date(b.created_at).getTime()
+        : 0
+
+      if (dateA !== dateB) return dateB - dateA
+      return Number(b.id) - Number(a.id)
+    })
+
+  const recentProjects = sortNewestFirst(projects)
+  const recentAchievements = sortNewestFirst(achievements)
+  const recentCertifications = sortNewestFirst(certifications)
+
+  const visibleProjects = showAllProjects
+    ? recentProjects
+    : recentProjects.slice(0, 2)
+
+  const visibleAchievements = showAllAchievements
+    ? recentAchievements
+    : recentAchievements.slice(0, 2)
+
+  const visibleCertifications = showAllCertifications
+    ? recentCertifications
+    : recentCertifications.slice(0, 2)
+
   const stats = [
     { label: 'Projects', count: loading ? '...' : projects.length },
     {
@@ -548,7 +581,19 @@ function Overview() {
         {error && <p role="alert">{error}</p>}
 
         <div className="project-list">
-          <h3>Your projects</h3>
+          <div className="overview-list-heading">
+            <h3>Your projects</h3>
+
+            {projects.length > 2 && (
+              <button
+                type="button"
+                className="overview-view-all"
+                onClick={() => setShowAllProjects((value) => !value)}
+              >
+                {showAllProjects ? 'Show latest 2' : 'View all projects'}
+              </button>
+            )}
+          </div>
 
           {loading ? (
             <p>Loading projects...</p>
@@ -557,7 +602,7 @@ function Overview() {
               Your portfolio starts here. Add your first project.
             </p>
           ) : (
-            projects.map((project) => (
+            visibleProjects.map((project) => (
               <article className="project-item" key={project.id}>
                 <div>
                   <strong>{project.title}</strong>
@@ -690,7 +735,21 @@ function Overview() {
         )}
 
         <div className="project-list">
-          <h3>Your achievements</h3>
+          <div className="overview-list-heading">
+            <h3>Your achievements</h3>
+
+            {achievements.length > 2 && (
+              <button
+                type="button"
+                className="overview-view-all"
+                onClick={() => setShowAllAchievements((value) => !value)}
+              >
+                {showAllAchievements
+                  ? 'Show latest 2'
+                  : 'View all achievements'}
+              </button>
+            )}
+          </div>
 
           {achievementLoading ? (
             <p>Loading achievements...</p>
@@ -699,7 +758,7 @@ function Overview() {
               No achievements yet. Add your first accomplishment above.
             </p>
           ) : (
-            achievements.map((achievement) => (
+            visibleAchievements.map((achievement) => (
               <article className="project-item" key={achievement.id}>
                 <div>
                   <strong>{achievement.title}</strong>
@@ -878,7 +937,21 @@ function Overview() {
         )}
 
         <div className="project-list">
-          <h3>Your certifications</h3>
+          <div className="overview-list-heading">
+            <h3>Your certifications</h3>
+
+            {certifications.length > 2 && (
+              <button
+                type="button"
+                className="overview-view-all"
+                onClick={() => setShowAllCertifications((value) => !value)}
+              >
+                {showAllCertifications
+                  ? 'Show latest 2'
+                  : 'View all certifications'}
+              </button>
+            )}
+          </div>
 
           {certificationLoading ? (
             <p>Loading certifications...</p>
@@ -887,7 +960,7 @@ function Overview() {
               No certifications yet. Add your first certification above.
             </p>
           ) : (
-            certifications.map((certification) => (
+            visibleCertifications.map((certification) => (
               <article className="project-item" key={certification.id}>
                 <div>
                   <strong>{certification.title}</strong>
